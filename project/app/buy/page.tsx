@@ -1,30 +1,59 @@
-import { PropertyGrid } from '@/components/properties/property-grid';
-import { PropertyFilters } from '@/components/properties/property-filters';
-import { PropertyMap } from '@/components/properties/property-map';
+// app/buy/page.tsx
+'use client';
 
-export default function BuyPage() {
+import { useState, useEffect } from 'react';
+import { PropertyCard } from '@/components/properties/property-card';
+import { usePropertyFilters } from '@/lib/hooks/use-property-filters';
+import { Property } from '@/lib/types/property';
+
+interface PropertyGridProps {
+  type: 'rent' | 'buy';
+}
+
+export function PropertyGrid({ type }: PropertyGridProps) {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const { filters, filteredProperties } = usePropertyFilters(properties, type);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const params = new URLSearchParams({
+          type,
+          priceMin: filters.priceRange[0].toString(),
+          priceMax: filters.priceRange[1].toString(),
+          description: filters.keyword,
+        });
+        const response = await fetch(`http://localhost:3001/api/properties?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setProperties(data);
+      } catch (error) {
+        console.error('Failed to fetch properties:', error);
+      }
+    };
+
+    fetchProperties();
+  }, [filters, type]);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Properties for Sale</h1>
-        
-        {/* Map Section */}
-        <div className="h-[400px] mb-8 rounded-lg overflow-hidden">
-          <PropertyMap />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters */}
-          <div className="lg:col-span-1">
-            <PropertyFilters />
-          </div>
-
-          {/* Property Grid */}
-          <div className="lg:col-span-3">
-            <PropertyGrid type="buy" />
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {filteredProperties.map((property) => (
+        <PropertyCard key={property.id} property={property} />
+      ))}
     </div>
   );
 }
+
+const BuyPage = () => {
+  return (
+    <div>
+      <h1>Buy Properties</h1>
+      <PropertyGrid type="buy" />
+    </div>
+  );
+};
+
+export { BuyPage };
+export default BuyPage;

@@ -1,3 +1,4 @@
+// components/properties/property-form.tsx
 'use client';
 
 import { useState } from 'react';
@@ -28,12 +29,35 @@ export function PropertyForm({ type }: PropertyFormProps) {
     bedrooms: '',
     bathrooms: '',
     area: '',
+    features: '',
+    images: '',
+    user_id: 'user1',
+    agent_id: 'agent1',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    try {
+      const response = await fetch('http://localhost:3001/api/properties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          type,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Property created:', data);
+      alert('Property created successfully!');
+    } catch (error) {
+      console.error('Failed to create property:', error);
+      alert('Failed to create property.');
+    }
   };
 
   return (
@@ -120,6 +144,37 @@ export function PropertyForm({ type }: PropertyFormProps) {
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="features">Features</Label>
+            <Input
+              id="features"
+              value={formData.features}
+              onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="images">Images</Label>
+            <Input
+              id="images"
+              type="text"
+              value={formData.images}
+              onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+              required
+            />
           </div>
 
           <Button type="submit" className="w-full">

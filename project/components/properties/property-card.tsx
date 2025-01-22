@@ -1,3 +1,4 @@
+// components/properties/property-card.tsx
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,11 +12,14 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const location = property.location;
+  const images = property.images;
+
   return (
     <Card className="overflow-hidden">
       <div className="relative h-48">
         <Image
-          src={property.images[0]}
+          src={images[0]}
           alt={property.title}
           fill
           className="object-cover"
@@ -33,7 +37,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         
         <div className="flex items-center text-sm text-gray-500 mb-4">
           <MapPin className="h-4 w-4 mr-1" />
-          {property.location.address}, {property.location.city}
+          {location.address}, {location.city}
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-4">
