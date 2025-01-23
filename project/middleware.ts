@@ -3,48 +3,27 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res });
+  try {
+    const res = NextResponse.next();
+    
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      throw new Error('Missing Supabase environment variables');
+    }
 
-  // Refresh session if expired
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    const supabase = createMiddlewareClient({ 
+      req: request, 
+      res,
+    }, {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    });
 
-  // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/sell'];
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  );
-
-  // Admin routes that require admin role
-  const adminRoutes = ['/admin'];
-  const isAdminRoute = adminRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  );
-
-  // Authentication routes
-  const authRoutes = ['/login', '/signup'];
-  const isAuthRoute = authRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  );
-
-  // Redirect if not authenticated
-  if (isProtectedRoute && !session) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    await supabase.auth.getSession();
+    return res;
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return NextResponse.next();
   }
-
-  // Redirect if not admin
-  if (isAdminRoute && (!session || session.user.app_metadata.role !== 'admin')) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  // Redirect if already authenticated
-  if (isAuthRoute && session) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  return res;
 }
 
 export const config = {

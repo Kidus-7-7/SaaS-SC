@@ -3,39 +3,53 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const supabase = createRouteHandlerClient({ cookies });
+  try {
+    const { searchParams } = new URL(request.url);
+    const supabase = createRouteHandlerClient({ cookies });
 
-  // Get filter parameters
-  const propertyType = searchParams.get('propertyType');
-  const listingType = searchParams.get('listingType');
-  const minPrice = searchParams.get('minPrice');
-  const maxPrice = searchParams.get('maxPrice');
-  const city = searchParams.get('city');
+    // Build query based on search params
+    let query = supabase
+      .from('properties')
+      .select('*')
+      .eq('type', searchParams.get('type') || 'buy');
 
-  let query = supabase
-    .from('properties')
-    .select(`
-      *,
-      owner:owner_id(full_name, email),
-      agent:agent_id(*)
-    `)
-    .eq('status', 'available');
+    // Add filters if they exist
+    if (searchParams.get('minPrice')) {
+      query = query.gte('price', searchParams.get('minPrice'));
+    }
+    if (searchParams.get('maxPrice')) {
+      query = query.lte('price', searchParams.get('maxPrice'));
+    }
+    if (searchParams.get('bedrooms')) {
+      const bedrooms = searchParams.get('bedrooms')?.split(',');
+      if (bedrooms?.length) {
+        query = query.in('bedrooms', bedrooms);
+      }
+    }
+    if (searchParams.get('propertyType')) {
+      const types = searchParams.get('propertyType')?.split(',');
+      if (types?.length) {
+        query = query.in('property_type', types);
+      }
+    }
+    if (searchParams.get('location')) {
+      query = query.ilike('location', `%${searchParams.get('location')}%`);
+    }
 
-  // Apply filters
-  if (propertyType) query = query.eq('property_type', propertyType);
-  if (listingType) query = query.eq('listing_type', listingType);
-  if (minPrice) query = query.gte('price', minPrice);
-  if (maxPrice) query = query.lte('price', maxPrice);
-  if (city) query = query.ilike('city', `%${city}%`);
+    const { data, error } = await query;
 
-  const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Properties API Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch properties' },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {

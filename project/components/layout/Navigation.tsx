@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Button } from '@/components/ui/button';
@@ -12,50 +13,88 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+import { Session } from '@supabase/auth-js';
 
 interface User {
   id: string;
-  email: string;
+  email: string | undefined;
   user_metadata: {
     full_name: string;
   };
+  full_name: string;
   app_metadata: {
     role?: string;
   };
+  role?: string;
+}
+
+// Define the custom User type
+interface CustomUser {
+  full_name: string;
+  id: string;
+  email: string;
+  role?: string;
+}
+
+// Function to convert Supabase User to custom User
+const convertSupabaseUser = (supabaseUser: import('@supabase/auth-js').User | null): CustomUser | null => {
+  if (!supabaseUser) return null;
+  return {
+    full_name: supabaseUser.user_metadata.full_name,
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    role: supabaseUser.app_metadata?.role,
+  };
+};
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing environment variables for Supabase configuration');
 }
 
 export function Navigation() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<CustomUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabaseClient = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+    const fetchSession = async () => {
+      if (!supabaseClient) return;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        setUser(session?.user ? convertSupabaseUser(session.user) || null : null);
+      } else {
+        console.log('No active session found. User is not authenticated.');
+      }
     };
 
-    getUser();
+    fetchSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const subscription = supabaseClient?.auth.onAuthStateChange((event: import('@supabase/auth-js').AuthChangeEvent, session: Session | null) => {
+      setUser(session?.user ? convertSupabaseUser(session.user) || null : null);
     });
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.data?.subscription?.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabaseClient]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (!supabaseClient) return;
+    await supabaseClient.auth.signOut();
     router.push('/');
     router.refresh();
   };
 
   const isActive = (path: string) => pathname === path;
+
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="border-b">
@@ -95,7 +134,7 @@ export function Navigation() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
-                {user?.app_metadata?.role === 'admin' && (
+                {user?.role === 'admin' && (
                   <NavigationMenuItem>
                     <Link href="/admin" legacyBehavior passHref>
                       <NavigationMenuLink className={navigationMenuTriggerStyle()}>

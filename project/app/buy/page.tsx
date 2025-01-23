@@ -13,6 +13,8 @@ interface PropertyGridProps {
 export function PropertyGrid({ type }: PropertyGridProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const { filters, filteredProperties } = usePropertyFilters(properties, type);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -31,6 +33,9 @@ export function PropertyGrid({ type }: PropertyGridProps) {
         setProperties(data);
       } catch (error) {
         console.error('Failed to fetch properties:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch properties');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -38,10 +43,26 @@ export function PropertyGrid({ type }: PropertyGridProps) {
   }, [filters, type]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {filteredProperties.map((property) => (
-        <PropertyCard key={property.id} property={property} />
-      ))}
+    <div className="lg:col-span-3">
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <p>Loading properties...</p>
+        </div>
+      ) : error ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-red-500">{error}</p>
+        </div>
+      ) : properties.length === 0 ? (
+        <div className="flex justify-center items-center h-64">
+          <p>No properties found matching your criteria</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {properties.map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
