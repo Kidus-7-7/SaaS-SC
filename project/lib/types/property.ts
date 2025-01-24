@@ -49,16 +49,21 @@ export type PropertyType =
 
 export type PropertyStatus = 
   | 'newly-built'
-  | 'old'
-  | 'renovated'
-  | 'under-construction'
-  | 'accepting-backup-offers';
+  | 'resale'
+  | 'off-plan'
+  | 'under-construction';
 
-export type ListingType = 'by-agent' | 'by-owner';
+export type ListingType = 'rent' | 'buy' | 'sale';
 
-export type FurnishingStatus = 'furnished' | 'semi-furnished' | 'unfurnished';
+export type FurnishingStatus = 
+  | 'unfurnished'
+  | 'semi-furnished'
+  | 'fully-furnished';
 
-export type AgentStatus = 'active' | 'inactive' | 'deactivated';
+export type AgentStatus = 
+  | 'available'
+  | 'busy'
+  | 'offline';
 
 export interface PropertyFilters {
   priceRange: [number, number];

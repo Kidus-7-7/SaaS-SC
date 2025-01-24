@@ -3,9 +3,10 @@
 import { PropertyCard } from './property-card';
 import { usePropertyFilters } from '@/lib/hooks/use-property-filters';
 import { properties } from '@/lib/data/properties';
+import { ListingType } from '@/lib/types/property';
 
 interface PropertyGridProps {
-  type: 'rent' | 'buy';
+  type: ListingType;
 }
 
 export function PropertyGrid({ type }: PropertyGridProps) {
