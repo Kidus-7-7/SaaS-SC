@@ -53,7 +53,7 @@ export type PropertyStatus =
   | 'off-plan'
   | 'under-construction';
 
-export type ListingType = 'rent' | 'buy' | 'sale';
+export type ListingType = 'rent' | 'buy';
 
 export type FurnishingStatus = 
   | 'unfurnished'
@@ -82,6 +82,7 @@ export interface PropertyFilters {
   furnishing: FurnishingStatus | null;
   maxDaysListed: number | null;
   keyword: string;
+  exactMatch: boolean;
 }
 
 export const addisAbabaSubCities = [

@@ -22,7 +22,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export default function PropertiesPage() {
   const params = useParams();
-  const type = params.type as 'buy' | 'rent';
+  const rawType = params.type as string;
+  const type = rawType === 'buy' ? 'sale' : 'rent';
+  
   const [view, setView] = useState<'map' | 'list'>('list');
   const [filters, setFilters] = useState({
     bedrooms: 'any',

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 
-export function PropertyMap() {
+const PropertyMap: FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,4 +20,6 @@ export function PropertyMap() {
       </div>
     </Card>
   );
-}
+};
+
+export default PropertyMap;

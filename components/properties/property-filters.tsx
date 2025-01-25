@@ -1,5 +1,6 @@
 'use client';
 
+import { FC } from 'react';
 import { usePropertyFilters } from '@/lib/hooks/use-property-filters';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -16,7 +17,7 @@ import {
   FurnishingStatus
 } from '@/lib/types/property';
 
-export function PropertyFilters() {
+const PropertyFilters: FC = () => {
   const { filters, setFilters } = usePropertyFilters([], 'rent');
 
   return (
@@ -279,4 +280,6 @@ export function PropertyFilters() {
       </CardContent>
     </Card>
   );
-}
+};
+
+export default PropertyFilters;

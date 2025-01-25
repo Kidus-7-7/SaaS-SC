@@ -1,22 +1,28 @@
 'use client';
 
-import { PropertyCard } from './property-card';
+import { FC } from 'react';
+import { PropertyList } from './PropertyList';
 import { usePropertyFilters } from '@/lib/hooks/use-property-filters';
-import { properties } from '@/lib/data/properties';
-import { ListingType } from '@/lib/types/property';
 
 interface PropertyGridProps {
-  type: ListingType;
+  type: 'sale' | 'rent';
 }
 
-export function PropertyGrid({ type }: PropertyGridProps) {
-  const { filteredProperties } = usePropertyFilters(properties, type);
+const PropertyGrid: FC<PropertyGridProps> = ({ type }) => {
+  const { filters } = usePropertyFilters([], type);
+
+  // Convert number[] to string for PropertyList
+  const adaptedFilters = {
+    bedrooms: filters.bedrooms.length > 0 ? String(filters.bedrooms[0]) : 'any',
+    bathrooms: filters.bathrooms.length > 0 ? String(filters.bathrooms[0]) : 'any',
+    exactMatch: filters.exactMatch ?? false
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {filteredProperties.map((property) => (
-        <PropertyCard key={property.id} property={property} />
-      ))}
+    <div>
+      <PropertyList type={type} filters={adaptedFilters} />
     </div>
   );
-}
+};
+
+export default PropertyGrid;

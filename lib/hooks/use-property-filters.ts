@@ -19,29 +19,29 @@ const initialFilters: PropertyFilters = {
   hasBasement: null,
   furnishing: null,
   maxDaysListed: null,
-  keyword: ''
+  keyword: '',
+  exactMatch: false
 };
 
-export function usePropertyFilters(properties: Property[], type: 'rent' | 'buy') {
+export function usePropertyFilters(properties: Property[], type: 'rent' | 'sale') {
   const [filters, setFilters] = useState<PropertyFilters>(initialFilters);
 
   const filteredProperties = properties.filter((property) => {
-    if (property.type !== type) return false;
-
-    const matchesPrice = (!filters.priceRange[0] || property.price >= filters.priceRange[0]) && 
+    if (property.listingType !== type) return false;
+        const matchesPrice = (!filters.priceRange[0] || property.price >= filters.priceRange[0]) && 
                         (!filters.priceRange[1] || property.price <= filters.priceRange[1]);
     
     const matchesBedrooms = filters.bedrooms.length === 0 || 
-                           filters.bedrooms.includes(property.bedrooms);
+                           (property.bedrooms && filters.bedrooms.includes(property.bedrooms));
     
     const matchesBathrooms = filters.bathrooms.length === 0 ||
-                            filters.bathrooms.includes(property.bathrooms);
+                            (property.bathrooms && filters.bathrooms.includes(property.bathrooms));
     
     const matchesLocation = !filters.location || 
-      property.location.city.toLowerCase().includes(filters.location.toLowerCase());
+                           property.location.city.toLowerCase().includes(filters.location.toLowerCase());
     
     const matchesSubCity = !filters.subCity ||
-      property.location.subCity === filters.subCity;
+                          property.location.subCity.toLowerCase().includes(filters.subCity.toLowerCase());
     
     const matchesArea = (!filters.minArea || property.area >= filters.minArea) &&
                        (!filters.maxArea || property.area <= filters.maxArea);
@@ -50,9 +50,5 @@ export function usePropertyFilters(properties: Property[], type: 'rent' | 'buy')
            matchesLocation && matchesSubCity && matchesArea;
   });
 
-  return {
-    filters,
-    setFilters,
-    filteredProperties,
-  };
+  return { filters, setFilters, filteredProperties };
 }

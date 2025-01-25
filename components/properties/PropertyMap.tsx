@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Property } from '@/types/property';
+import { Property } from '@/lib/types/property';
 import { loadGoogleMapsScript } from '@/lib/utils/loadGoogleMaps';
 
 interface PropertyMapProps {
@@ -47,9 +47,12 @@ export function PropertyMap({
 
         // Add markers for properties
         properties.forEach(property => {
-          if (property.latitude && property.longitude) {
+          if (property.location?.coordinates?.lat && property.location?.coordinates?.lng) {
             const marker = new google.maps.Marker({
-              position: { lat: property.latitude, lng: property.longitude },
+              position: { 
+                lat: property.location.coordinates.lat, 
+                lng: property.location.coordinates.lng 
+              },
               map: mapInstance,
               title: property.title,
             });
