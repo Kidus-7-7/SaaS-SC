@@ -146,6 +146,49 @@ const SelectSeparator = React.forwardRef<
 ));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
+interface MultiSelectProps<T extends string> {
+  value: T[];
+  onChange: (value: T[]) => void;
+  options: { label: string; value: T }[];
+  label: string;
+  multiple?: boolean;
+  className?: string;
+}
+
+export function MultiSelect<T extends string>({
+  value,
+  onChange,
+  options,
+  label,
+  multiple = true,
+  className,
+}: MultiSelectProps<T>) {
+  return (
+    <div className="relative">
+      <select
+        multiple={multiple}
+        value={value}
+        onChange={(e) => {
+          const selectedOptions = Array.from(e.target.selectedOptions).map(
+            (option) => option.value as T
+          );
+          onChange(selectedOptions);
+        }}
+        className={cn(
+          'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export {
   Select,
   SelectGroup,

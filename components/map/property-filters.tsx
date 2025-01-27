@@ -11,16 +11,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
+type PropertyType = "commercial" | "all" | "apartment" | "villa" | "house" | "land";
+
 interface PropertyFiltersProps {
   onFilterChange: (filters: {
-    propertyType: string;
+    propertyType: PropertyType;
     priceRange: { min: number; max: number };
     bedrooms: string;
   }) => void;
 }
 
 export function PropertyFilters({ onFilterChange }: PropertyFiltersProps) {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    propertyType: PropertyType;
+    priceRange: { min: number; max: number };
+    bedrooms: string;
+  }>({
     propertyType: 'all',
     priceRange: { min: 0, max: 10000000 },
     bedrooms: 'all'
@@ -50,6 +56,7 @@ export function PropertyFilters({ onFilterChange }: PropertyFiltersProps) {
               <SelectItem value="house">House</SelectItem>
               <SelectItem value="villa">Villa</SelectItem>
               <SelectItem value="commercial">Commercial</SelectItem>
+              <SelectItem value="land">Land</SelectItem>
             </SelectContent>
           </Select>
         </div>

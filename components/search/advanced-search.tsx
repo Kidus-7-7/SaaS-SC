@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Map, Source, Layer } from 'react-map-gl';
 import { useDebounce } from '@/hooks/use-debounce';
 import { SearchFilters } from '@/types/search';
+import { Property } from '@/types/property';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select } from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/select';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -84,8 +85,8 @@ export function AdvancedSearch() {
 
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">Property Type</h3>
-          <Select
-            multiple
+          <MultiSelect<Property['property_type']>
+            label="Property Type"
             value={filters.propertyType}
             onChange={(value) => handleFilterChange('propertyType', value)}
             options={[

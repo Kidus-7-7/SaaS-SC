@@ -4,9 +4,10 @@ import { PropertyMap } from '@/components/map/property-map';
 import { PropertyFilters } from '@/components/map/property-filters';
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { Property } from '@/types/property';
 
 // Sample properties data
-const sampleProperties = [
+const sampleProperties: Property[] = [
   {
     id: '1',
     title: 'Modern Apartment in Bole',
@@ -20,10 +21,13 @@ const sampleProperties = [
     area_sqm: 120,
     address: 'Bole Road, Near Millennium Hall',
     city: 'Addis Ababa',
-    latitude: 9.0127,
-    longitude: 38.7615,
+    latitude: 9.0215,
+    longitude: 38.7892,
     features: ['parking', 'security', 'elevator'],
-    images: ['/images/properties/apartment1.jpg'],
+    images: ['/images/sample/apartment1.jpg'],
+    owner_id: 'sample-owner-1',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: '2',
@@ -41,7 +45,10 @@ const sampleProperties = [
     latitude: 9.0234,
     longitude: 38.7912,
     features: ['parking', 'garden', 'security'],
-    images: ['/images/properties/villa1.jpg'],
+    images: ['/images/sample/villa1.jpg'],
+    owner_id: 'sample-owner-2',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: '3',
@@ -59,15 +66,26 @@ const sampleProperties = [
     latitude: 9.0346,
     longitude: 38.7468,
     features: ['parking', 'security', 'water_tank'],
-    images: ['/images/properties/commercial1.jpg'],
+    images: ['/images/sample/commercial1.jpg'],
+    owner_id: 'sample-owner-3',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
 ];
 
+type PropertyType = "commercial" | "all" | "apartment" | "villa" | "house" | "land";
+
+interface Filters {
+  propertyType: PropertyType;
+  priceRange: { min: number; max: number; };
+  bedrooms: string;
+}
+
 export default function TestMapPage() {
-  const [filters, setFilters] = useState({
-    propertyType: 'all',
+  const [filters, setFilters] = useState<Filters>({
+    propertyType: "all",
     priceRange: { min: 0, max: 10000000 },
-    bedrooms: 'all'
+    bedrooms: "all"
   });
 
   const filteredProperties = useMemo(() => {
