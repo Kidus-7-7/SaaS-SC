@@ -58,7 +58,7 @@ const sampleProperties: Property[] = [
     property_type: 'commercial',
     listing_type: 'rent',
     status: 'available',
-    bedrooms: null,
+    bedrooms: undefined,
     bathrooms: 2,
     area_sqm: 150,
     address: 'Piassa, Near National Theater',
