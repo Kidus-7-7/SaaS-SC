@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertForm } from '@/components/alerts/alert-form';
 import { AlertsList } from '@/components/alerts/alerts-list';
 import { Button } from '@/components/ui/button';
@@ -19,8 +19,43 @@ export default function AlertsPage() {
   const [alerts, setAlerts] = useState<PropertyAlert[]>([]);
   const [editingAlert, setEditingAlert] = useState<PropertyAlert | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: alerts, error } = await supabase
+          .from('property_alerts')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        setAlerts(alerts || []);
+      } catch (error) {
+        console.error('Error fetching alerts:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load alerts. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAlerts();
+  }, [supabase, toast]);
 
   const handleCreateAlert = async (data: Partial<PropertyAlert>) => {
     try {
@@ -186,15 +221,26 @@ export default function AlertsPage() {
         </Dialog>
       </div>
 
-      <AlertsList
-        alerts={alerts}
-        onToggleAlert={handleToggleAlert}
-        onDeleteAlert={handleDeleteAlert}
-        onEditAlert={(alert) => {
-          setEditingAlert(alert);
-          setIsDialogOpen(true);
-        }}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      ) : alerts.length > 0 ? (
+        <AlertsList
+          alerts={alerts}
+          onToggleAlert={handleToggleAlert}
+          onDeleteAlert={handleDeleteAlert}
+          onEditAlert={(alert) => {
+            setEditingAlert(alert);
+            setIsDialogOpen(true);
+          }}
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="mb-4 text-lg text-muted-foreground">No alerts created yet</p>
+          <Button onClick={() => setIsDialogOpen(true)}>Create Your First Alert</Button>
+        </div>
+      )}
     </div>
   );
 }

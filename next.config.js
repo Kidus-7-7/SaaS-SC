@@ -1,11 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['*']
-    }
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -14,14 +8,10 @@ const nextConfig = {
   },
   images: {
     domains: ['images.unsplash.com'],
-    unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
-      },
-    ],
+  },
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 }
 
