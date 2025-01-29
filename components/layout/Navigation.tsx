@@ -54,7 +54,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing environment variables for Supabase configuration');
 }
 
-export function Navigation() {
+function Navigation() {
   const [user, setUser] = useState<CustomUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
@@ -182,3 +182,5 @@ export function Navigation() {
     </div>
   );
 }
+
+export default Navigation;

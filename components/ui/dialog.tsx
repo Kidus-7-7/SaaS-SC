@@ -33,15 +33,27 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
-  // Ensure there's a DialogTitle component within children
-  const hasDialogTitle = React.Children.toArray(children).some(
-    (child) =>
-      React.isValidElement(child) &&
-      child.type &&
-      (child.type as any).displayName === 'DialogTitle'
-  );
+  // Recursively check for DialogTitle component
+  const hasDialogTitle = (children: React.ReactNode): boolean => {
+    const childArray = React.Children.toArray(children);
+    return childArray.some((child) => {
+      if (!React.isValidElement(child)) return false;
+      
+      // Check if the current element is a DialogTitle
+      if (child.type && (child.type as any).displayName === 'DialogTitle') {
+        return true;
+      }
+      
+      // Recursively check children
+      if (child.props && child.props.children) {
+        return hasDialogTitle(child.props.children);
+      }
+      
+      return false;
+    });
+  };
 
-  if (!hasDialogTitle) {
+  if (!hasDialogTitle(children)) {
     console.warn(
       'DialogContent requires a DialogTitle component for accessibility.'
     );
