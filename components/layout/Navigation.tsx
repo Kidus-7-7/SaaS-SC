@@ -134,6 +134,15 @@ export function Navigation() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
+                {user && (
+                  <NavigationMenuItem>
+                    <Link href="/alerts" legacyBehavior passHref>
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Alerts
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                )}
                 {user?.role === 'admin' && (
                   <NavigationMenuItem>
                     <Link href="/admin" legacyBehavior passHref>

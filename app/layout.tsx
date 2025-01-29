@@ -1,8 +1,13 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Navigation } from '@/components/layout/Navigation';
-import { Toaster } from '@/components/ui/toaster';
+import dynamic from 'next/dynamic';
+
+const Navigation = dynamic(() => import('@/components/layout/Navigation'), {
+  ssr: true,
+});
+
+const ToasterProvider = dynamic(() => import('@/components/providers/toaster-provider').then(mod => mod.ToasterProvider));
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,7 +26,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Navigation />
         <main>{children}</main>
-        <Toaster />
+        <ToasterProvider />
       </body>
     </html>
   );

@@ -7,8 +7,9 @@ export const properties: Property[] = [
     type: 'rent',
     price: 25000,
     location: {
-      address: 'Bole Road',
+      address: 'Bole Road, Near Friendship Hotel',
       city: 'Addis Ababa',
+      subCity: 'Bole',
       coordinates: { lat: 9.0222, lng: 38.7468 }
     },
     bedrooms: 2,
@@ -19,7 +20,7 @@ export const properties: Property[] = [
     ],
     features: ['Parking', 'Security', 'Elevator'],
     description: 'Modern apartment with great city views',
-    agent: { id: 1, name: 'Abebe Kebede' }
+    agent: { id: 1, name: 'Abebe Kebede', status: 'active' }
   },
   {
     id: 2,
@@ -27,9 +28,10 @@ export const properties: Property[] = [
     type: 'buy',
     price: 12000000,
     location: {
-      address: 'CMC Area',
+      address: 'Mexico Square, Behind Century Mall',
       city: 'Addis Ababa',
-      coordinates: { lat: 9.0314, lng: 38.7612 }
+      subCity: 'Kirkos',
+      coordinates: { lat: 9.0128, lng: 38.7525 }
     },
     bedrooms: 5,
     bathrooms: 4,
@@ -39,6 +41,6 @@ export const properties: Property[] = [
     ],
     features: ['Garden', 'Pool', 'Security'],
     description: 'Spacious villa with modern amenities',
-    agent: { id: 2, name: 'Sara Mohammed' }
+    agent: { id: 2, name: 'Sara Mohammed', status: 'active' }
   }
 ];
