@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { PropertyList } from '@/components/properties/PropertyList';
 import { PropertyMap } from '@/components/properties/PropertyMap';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent as ImportedSheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent as ImportedSheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { MapPin, Search, SlidersHorizontal } from 'lucide-react';
@@ -70,6 +70,7 @@ export default function PropertiesPage() {
                 </Button>
               </SheetTrigger>
               <ImportedSheetContent>
+                <SheetTitle className="text-lg font-semibold mb-4">Filters</SheetTitle>
                 <PropertyFilters />
               </ImportedSheetContent>
             </Sheet>

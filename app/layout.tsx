@@ -2,14 +2,16 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
-
-const Navigation = dynamic(() => import('@/components/layout/Navigation'), {
-  ssr: true,
-});
-
-const ToasterProvider = dynamic(() => import('@/components/providers/toaster-provider').then(mod => mod.ToasterProvider));
+import { ProvidersWrapper } from '@/components/providers/providers-wrapper';
 
 const inter = Inter({ subsets: ['latin'] });
+
+const Navigation = dynamic(
+  () => import('@/components/layout/Navigation').then((mod) => mod.default),
+  {
+    ssr: true,
+  }
+);
 
 export const metadata: Metadata = {
   title: 'Real Estate Platform',
@@ -26,7 +28,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Navigation />
         <main>{children}</main>
-        <ToasterProvider />
+        <ProvidersWrapper />
       </body>
     </html>
   );
