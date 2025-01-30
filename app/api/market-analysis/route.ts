@@ -1,139 +1,57 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import Redis from 'redis';
-import * as tf from '@tensorflow/tfjs';
-import regression from 'regression';
-
-// Initialize Redis client with type safety
-const redisClient = Redis.createClient({
-  url: process.env.REDIS_URL,
-}) as Redis.RedisClientType;
-
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
+import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL');
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL')
 }
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY')
 }
 
-const supabaseClient = createClient(
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   {
     auth: { persistSession: false }
   }
-);
+)
 
-// Cache duration in seconds
-const CACHE_DURATION = 3600; // 1 hour
-
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    await redisClient.connect();
+    const { data, error } = await supabase
+      .from('market_data')
+      .select('*')
+      .limit(100)
 
-    const { searchParams } = new URL(req.url);
-    const location = searchParams.get('location');
-    const propertyType = searchParams.get('propertyType');
+    if (error) throw error
 
-    if (!location || !propertyType) {
-      return NextResponse.json(
-        { error: 'Location and property type are required' },
-        { status: 400 }
-      );
-    }
-
-    // Try to get cached data first
-    const cacheKey = `market_analysis:${location}:${propertyType}`;
-    const cachedData = await redisClient.get(cacheKey);
-
-    if (cachedData) {
-      return NextResponse.json(JSON.parse(cachedData));
-    }
-
-    // Fetch historical price data from Supabase
-    const { data: historicalData, error } = await supabaseClient
-      .from('properties')
-      .select('price, created_at')
-      .eq('location', location)
-      .eq('property_type', propertyType)
-      .order('created_at', { ascending: true });
-
-    if (error) throw error;
-
-    // Prepare data for regression analysis
-    const regressionData = historicalData.map((d, i) => [
-      i,
-      d.price,
-    ]);
-
-    // Perform linear regression
-    const result = regression.linear(regressionData);
-    const gradient = result.equation[0];
-    const yIntercept = result.equation[1];
-
-    // Generate predictions for the next 6 months
-    const predictions = Array.from({ length: 6 }, (_, i) => {
-      const x = regressionData.length + i;
-      const predictedPrice = gradient * x + yIntercept;
-      const date = new Date();
-      date.setMonth(date.getMonth() + i + 1);
-      return {
-        date: date.toISOString(),
-        price: Math.round(predictedPrice),
-      };
-    });
-
-    // Calculate market metrics
-    const prices = historicalData.map(d => d.price);
-    const averagePrice = prices.reduce((a, b) => a + b, 0) / prices.length;
-    const priceChange = ((prices[prices.length - 1] - prices[0]) / prices[0]) * 100;
-    
-    // Calculate volatility (standard deviation)
-    const variance = prices.reduce((sum, price) => {
-      return sum + Math.pow(price - averagePrice, 2);
-    }, 0) / prices.length;
-    const volatility = Math.sqrt(variance);
-
-    const analysisResults = {
-      historicalPrices: historicalData,
-      predictions,
-      metrics: {
-        averagePrice: Math.round(averagePrice),
-        priceChange: Math.round(priceChange * 100) / 100,
-        volatility: Math.round((volatility / averagePrice) * 100) / 100,
-        confidence: Math.round(result.r2 * 100) / 100, // R-squared value as confidence
-      },
-    };
-
-    // Cache the results
-    await redisClient.setEx(
-      cacheKey,
-      CACHE_DURATION,
-      JSON.stringify(analysisResults)
-    );
-
-    return NextResponse.json(analysisResults);
+    return Response.json({ data })
   } catch (error) {
-    console.error('Market Analysis Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to analyze market data' },
+    console.error('Market analysis error:', error)
+    return Response.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
-    );
-  } finally {
-    await redisClient.disconnect();
+    )
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // Your existing code
-    return Response.json({ success: true });
+    const body = await request.json()
+    
+    const { data, error } = await supabase
+      .from('market_data')
+      .insert([body])
+
+    if (error) throw error
+
+    return Response.json({ data })
   } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    console.error('Market analysis error:', error)
+    return Response.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
   }
 }
