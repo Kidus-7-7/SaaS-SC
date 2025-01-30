@@ -1,94 +1,67 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { SearchFilters } from '@/types/search';
+import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export async function POST(request: Request) {
   try {
-    const supabase = createClient();
-    const filters: SearchFilters = await req.json();
-
-    let query = supabase
-      .from('properties')
-      .select(`
-        *,
-        owner:owner_id(*),
-        agent:agent_id(*)
-      `);
+    const filters = await request.json()
+    let query = supabase.from('properties').select('*')
 
     // Apply filters
-    if (filters.priceRange) {
-      query = query
-        .gte('price', filters.priceRange.min)
-        .lte('price', filters.priceRange.max);
-    }
-
-    if (filters.propertyType?.length) {
-      query = query.in('property_type', filters.propertyType);
-    }
-
-    if (filters.listingType?.length) {
-      query = query.in('listing_type', filters.listingType);
+    if (filters.price) {
+      const { min, max } = filters.price
+      if (min) query = query.gte('price', min)
+      if (max) query = query.lte('price', max)
     }
 
     if (filters.bedrooms) {
-      query = query.eq('bedrooms', filters.bedrooms);
+      query = query.eq('bedrooms', filters.bedrooms)
     }
 
     if (filters.bathrooms) {
-      query = query.eq('bathrooms', filters.bathrooms);
+      query = query.eq('bathrooms', filters.bathrooms)
     }
 
-    if (filters.areaSqm) {
-      query = query
-        .gte('area_sqm', filters.areaSqm.min)
-        .lte('area_sqm', filters.areaSqm.max);
+    if (filters.propertyType) {
+      query = query.eq('property_type', filters.propertyType)
     }
 
-    if (filters.city) {
-      query = query.eq('city', filters.city);
-    }
-
-    // Handle geographic search
+    // Location-based search
     if (filters.coordinates) {
-      const { latitude, longitude, radius } = filters.coordinates;
-      // Using PostGIS for geographic search
-      query = query.raw(`
-        ST_DWithin(
-          ST_MakePoint(longitude, latitude)::geography,
-          ST_MakePoint(${longitude}, ${latitude})::geography,
-          ${radius * 1000}
-        )
-      `);
-    }
+      const { latitude, longitude, radius } = filters.coordinates
+      
+      // Using a simpler bounding box approach instead of PostGIS
+      const lat = parseFloat(latitude)
+      const lng = parseFloat(longitude)
+      const radiusInDegrees = radius / 111.32 // approximate degrees for km at equator
 
-    // Handle bounding box search
-    if (filters.boundingBox) {
-      const { north, south, east, west } = filters.boundingBox;
       query = query
-        .gte('latitude', south)
-        .lte('latitude', north)
-        .gte('longitude', west)
-        .lte('longitude', east);
+        .gte('latitude', lat - radiusInDegrees)
+        .lte('latitude', lat + radiusInDegrees)
+        .gte('longitude', lng - radiusInDegrees)
+        .lte('longitude', lng + radiusInDegrees)
     }
 
-    const { data: properties, error, count } = await query
-      .order('created_at', { ascending: false });
+    const { data, error } = await query
 
     if (error) {
-      throw error;
+      throw error
     }
 
-    return NextResponse.json({
-      properties,
-      total: count || 0,
-      filters
-    });
+    return NextResponse.json({ 
+      properties: data,
+      count: data.length 
+    })
 
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Search error:', error)
     return NextResponse.json(
-      { error: 'Failed to search properties' },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
-    );
+    )
   }
 }
