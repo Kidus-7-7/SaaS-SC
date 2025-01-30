@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { Property } from '@/types/property';
 import { PropertyComparison as PropertyComparisonType } from '@/types/saved-features';

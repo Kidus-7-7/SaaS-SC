@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['images.unsplash.com'],
+    domains: ['your-domain.com'],
   },
   swcMinify: true,
   compiler: {
