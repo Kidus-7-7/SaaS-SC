@@ -9,6 +9,9 @@
     "lint": "next lint",
     "analyze": "python scripts/market_analysis.py"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@next/swc-wasm-nodejs": "13.5.1",

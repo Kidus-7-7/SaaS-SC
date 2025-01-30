@@ -1,8 +1,10 @@
 # example netlify.toml
 [build]
+  command = "yarn install && yarn build"
   command = "npm run dev"
   functions = "netlify/functions"
-  publish = ""
+  
+  publish = "build"
 
   ## Uncomment to use this redirect for Single Page Applications like create-react-app.
   ## Not needed for static site generators.
@@ -21,4 +23,4 @@
   ## more info on configuring this file: https://ntl.fyi/file-based-build-config
 
 [build.environment]
-  NODE_VERSION = "20"  # or specify a newer version
+  NODE_VERSION = "20.18.2"  # Specify exact version
