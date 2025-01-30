@@ -4,17 +4,29 @@ import Redis from 'redis';
 import * as tf from '@tensorflow/tfjs';
 import regression from 'regression';
 
-// Initialize Redis client
+// Initialize Redis client with type safety
 const redisClient = Redis.createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-});
+  url: process.env.REDIS_URL,
+}) as Redis.RedisClientType;
 
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL');
+}
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY');
+}
+
+const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  {
+    auth: { persistSession: false }
+  }
+);
 
 // Cache duration in seconds
 const CACHE_DURATION = 3600; // 1 hour
@@ -43,7 +55,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch historical price data from Supabase
-    const { data: historicalData, error } = await supabase
+    const { data: historicalData, error } = await supabaseClient
       .from('properties')
       .select('price, created_at')
       .eq('location', location)
@@ -113,5 +125,15 @@ export async function GET(req: NextRequest) {
     );
   } finally {
     await redisClient.disconnect();
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    // Your existing code
+    return Response.json({ success: true });
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
