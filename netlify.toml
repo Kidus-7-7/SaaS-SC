@@ -3,7 +3,7 @@
 
 [build]
   command = "yarn install && yarn build"
-  publish = "dist"
+  publish = ".next"
   functions = "netlify/functions"
 
 [dev]
