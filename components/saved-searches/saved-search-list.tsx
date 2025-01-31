@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { SavedSearch } from '@/types/saved-features';
 import { Button } from '@/components/ui/button';

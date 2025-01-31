@@ -1,119 +1,112 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import Redis from 'redis';
-import regression from 'regression';
-
-// Initialize Redis client
-const redisClient = Redis.createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-});
-
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL')
+}
 
-// Cache duration in seconds
-const CACHE_DURATION = 3600; // 1 hour
+if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY')
+}
 
-export async function GET(req: NextRequest) {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  {
+    auth: { persistSession: false }
+  }
+)
+
+// Helper function to calculate statistics
+function calculateMarketStats(historicalData: any[]) {
+  // Calculate average price
+  const prices = historicalData.map(item => item.price);
+  const averagePrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
+  // Calculate price volatility (standard deviation)
+  const variance = prices.reduce((sum, price) => {
+    const diff = price - averagePrice;
+    return sum + diff * diff;
+  }, 0) / prices.length;
+  const volatility = Math.sqrt(variance);
+
+  // Calculate price range
+  const priceRange = {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  };
+
+  // Calculate price trend
+  const trend = prices[prices.length - 1] > prices[0] ? 'Increasing' : 'Decreasing';
+
+  return {
+    trend,
+    averagePrice,
+    volatility,
+    priceRange,
+    dataPoints: prices.length,
+  };
+}
+
+export async function GET(request: NextRequest) {
   try {
-    await redisClient.connect();
-
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const location = searchParams.get('location');
-    const propertyType = searchParams.get('propertyType');
+    const propertyType = searchParams.get('property_type');
 
-    if (!location || !propertyType) {
+    let query = supabase
+      .from('market_data')
+      .select('*')
+      .limit(100);
+
+    if (location) {
+      query = query.eq('location', location);
+    }
+
+    if (propertyType) {
+      query = query.eq('property_type', propertyType);
+    }
+
+    const { data: marketData, error } = await query;
+
+    if (error) throw error;
+
+    if (!marketData || marketData.length === 0) {
       return NextResponse.json(
-        { error: 'Location and property type are required' },
-        { status: 400 }
-      );
-    }
-
-    // Try to get cached data first
-    const cacheKey = `market_analysis:${location}:${propertyType}`;
-    const cachedData = await redisClient.get(cacheKey);
-
-    if (cachedData) {
-      return NextResponse.json(JSON.parse(cachedData));
-    }
-
-    // Fetch historical price data from Supabase
-    const { data: historicalData, error } = await supabase
-      .from('properties')
-      .select('price, created_at')
-      .eq('location', location)
-      .eq('property_type', propertyType)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      throw error;
-    }
-
-    if (!historicalData || historicalData.length === 0) {
-      return NextResponse.json(
-        { error: 'No historical data found for the specified criteria' },
+        { error: 'No market data found for the specified criteria' },
         { status: 404 }
       );
     }
 
-    // Prepare data for regression analysis
-    const data = historicalData.map((item) => {
-      const date = new Date(item.created_at);
-      return [date.getTime(), item.price];
-    });
+    const analysis = calculateMarketStats(marketData);
 
-    // Perform linear regression
-    const result = regression.linear(data);
-    const gradient = result.equation[0];
-    const yIntercept = result.equation[1];
-    const rSquared = result.r2;
-
-    // Calculate current trend
-    const trend = gradient > 0 ? 'Increasing' : gradient < 0 ? 'Decreasing' : 'Stable';
-
-    // Calculate average price
-    const averagePrice = historicalData.reduce((sum, item) => sum + item.price, 0) / historicalData.length;
-
-    // Calculate price volatility (standard deviation)
-    const variance = historicalData.reduce((sum, item) => {
-      const diff = item.price - averagePrice;
-      return sum + diff * diff;
-    }, 0) / historicalData.length;
-    const volatility = Math.sqrt(variance);
-
-    // Prepare market analysis results
-    const analysis = {
-      trend,
-      averagePrice,
-      volatility,
-      confidence: rSquared,
-      priceRange: {
-        min: Math.min(...historicalData.map(item => item.price)),
-        max: Math.max(...historicalData.map(item => item.price)),
-      },
-      predictedTrend: {
-        gradient,
-        yIntercept,
-        equation: result.string,
-      },
-      dataPoints: historicalData.length,
-    };
-
-    // Cache the results
-    await redisClient.setEx(cacheKey, CACHE_DURATION, JSON.stringify(analysis));
-
-    return NextResponse.json(analysis);
+    return NextResponse.json({ data: analysis });
   } catch (error) {
     console.error('Market analysis error:', error);
     return NextResponse.json(
-      { error: 'Failed to perform market analysis' },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
-  } finally {
-    await redisClient.disconnect();
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    
+    const { data, error } = await supabase
+      .from('market_data')
+      .insert([body]);
+
+    if (error) throw error;
+
+    return NextResponse.json({ data });
+  } catch (error) {
+    console.error('Market analysis error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }

@@ -43,10 +43,10 @@ const DialogContent = React.forwardRef<
       if (child.type && (child.type as any).displayName === 'DialogTitle') {
         return true;
       }
-      
       // Recursively check children
-      if (child.props && child.props.children) {
-        return hasDialogTitle(child.props.children);
+      if (child.props && typeof child.props === 'object' && 'children' in child.props) {
+        const childProps = child.props as { children: React.ReactNode };
+        return hasDialogTitle(childProps.children);
       }
       
       return false;

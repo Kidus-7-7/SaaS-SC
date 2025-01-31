@@ -74,7 +74,7 @@ export default function AdminPage() {
     };
 
     fetchData();
-  }, []);
+  }, [supabase, toast]);
 
   const handlePropertyAction = async (propertyId: string, action: 'approve' | 'reject') => {
     try {

@@ -69,8 +69,9 @@ const SheetContent = React.forwardRef<
       }
       
       // Recursively check children
-      if (child.props && child.props.children) {
-        return hasSheetTitle(child.props.children);
+      if (child.props && typeof child.props === 'object' && 'children' in child.props) {
+        const childProps = child.props as { children: React.ReactNode };
+        return hasSheetTitle(childProps.children);
       }
       
       return false;

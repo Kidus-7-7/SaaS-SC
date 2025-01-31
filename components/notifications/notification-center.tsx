@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { PropertyNotification } from '@/types/saved-features';
 import { Card } from '@/components/ui/card';
