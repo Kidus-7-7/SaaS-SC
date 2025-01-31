@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Redis from 'redis';
-import * as tf from '@tensorflow/tfjs';
 import regression from 'regression';
 
 // Initialize Redis client
@@ -50,65 +49,68 @@ export async function GET(req: NextRequest) {
       .eq('property_type', propertyType)
       .order('created_at', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
+
+    if (!historicalData || historicalData.length === 0) {
+      return NextResponse.json(
+        { error: 'No historical data found for the specified criteria' },
+        { status: 404 }
+      );
+    }
 
     // Prepare data for regression analysis
-    const regressionData = historicalData.map((d, i) => [
-      i,
-      d.price,
-    ]);
-
-    // Perform linear regression
-    const result = regression.linear(regressionData);
-    const gradient = result.equation[0];
-    const yIntercept = result.equation[1];
-
-    // Generate predictions for the next 6 months
-    const predictions = Array.from({ length: 6 }, (_, i) => {
-      const x = regressionData.length + i;
-      const predictedPrice = gradient * x + yIntercept;
-      const date = new Date();
-      date.setMonth(date.getMonth() + i + 1);
-      return {
-        date: date.toISOString(),
-        price: Math.round(predictedPrice),
-      };
+    const data = historicalData.map((item) => {
+      const date = new Date(item.created_at);
+      return [date.getTime(), item.price];
     });
 
-    // Calculate market metrics
-    const prices = historicalData.map(d => d.price);
-    const averagePrice = prices.reduce((a, b) => a + b, 0) / prices.length;
-    const priceChange = ((prices[prices.length - 1] - prices[0]) / prices[0]) * 100;
-    
-    // Calculate volatility (standard deviation)
-    const variance = prices.reduce((sum, price) => {
-      return sum + Math.pow(price - averagePrice, 2);
-    }, 0) / prices.length;
+    // Perform linear regression
+    const result = regression.linear(data);
+    const gradient = result.equation[0];
+    const yIntercept = result.equation[1];
+    const rSquared = result.r2;
+
+    // Calculate current trend
+    const trend = gradient > 0 ? 'Increasing' : gradient < 0 ? 'Decreasing' : 'Stable';
+
+    // Calculate average price
+    const averagePrice = historicalData.reduce((sum, item) => sum + item.price, 0) / historicalData.length;
+
+    // Calculate price volatility (standard deviation)
+    const variance = historicalData.reduce((sum, item) => {
+      const diff = item.price - averagePrice;
+      return sum + diff * diff;
+    }, 0) / historicalData.length;
     const volatility = Math.sqrt(variance);
 
-    const analysisResults = {
-      historicalPrices: historicalData,
-      predictions,
-      metrics: {
-        averagePrice: Math.round(averagePrice),
-        priceChange: Math.round(priceChange * 100) / 100,
-        volatility: Math.round((volatility / averagePrice) * 100) / 100,
-        confidence: Math.round(result.r2 * 100) / 100, // R-squared value as confidence
+    // Prepare market analysis results
+    const analysis = {
+      trend,
+      averagePrice,
+      volatility,
+      confidence: rSquared,
+      priceRange: {
+        min: Math.min(...historicalData.map(item => item.price)),
+        max: Math.max(...historicalData.map(item => item.price)),
       },
+      predictedTrend: {
+        gradient,
+        yIntercept,
+        equation: result.string,
+      },
+      dataPoints: historicalData.length,
     };
 
     // Cache the results
-    await redisClient.setEx(
-      cacheKey,
-      CACHE_DURATION,
-      JSON.stringify(analysisResults)
-    );
+    await redisClient.setEx(cacheKey, CACHE_DURATION, JSON.stringify(analysis));
 
-    return NextResponse.json(analysisResults);
+    return NextResponse.json(analysis);
   } catch (error) {
-    console.error('Market Analysis Error:', error);
+    console.error('Market analysis error:', error);
     return NextResponse.json(
-      { error: 'Failed to analyze market data' },
+      { error: 'Failed to perform market analysis' },
       { status: 500 }
     );
   } finally {
