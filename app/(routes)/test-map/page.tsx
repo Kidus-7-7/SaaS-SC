@@ -13,9 +13,9 @@ const sampleProperties: Property[] = [
     title: 'Modern Apartment in Bole',
     description: 'Beautiful 2-bedroom apartment with city view',
     price: 2500000,
-    property_type: 'apartment',
-    listing_type: 'sale',
-    status: 'available',
+    propertyType: 'apartment',
+    listingType: 'sale',
+    propertyStatus: 'available',
     bedrooms: 2,
     bathrooms: 2,
     area_sqm: 120,
@@ -34,9 +34,9 @@ const sampleProperties: Property[] = [
     title: 'Villa in CMC',
     description: 'Spacious family villa with garden',
     price: 5000000,
-    property_type: 'villa',
-    listing_type: 'sale',
-    status: 'available',
+    propertyType: 'villa',
+    listingType: 'sale',
+    propertyStatus: 'available',
     bedrooms: 4,
     bathrooms: 3,
     area_sqm: 300,
@@ -55,9 +55,9 @@ const sampleProperties: Property[] = [
     title: 'Commercial Space in Piassa',
     description: 'Prime location commercial property',
     price: 35000,
-    property_type: 'commercial',
-    listing_type: 'rent',
-    status: 'available',
+    propertyType: 'commercial',
+    listingType: 'rent',
+    propertyStatus: 'available',
     bedrooms: undefined,
     bathrooms: 2,
     area_sqm: 150,
@@ -91,7 +91,7 @@ export default function TestMapPage() {
   const filteredProperties = useMemo(() => {
     return sampleProperties.filter(property => {
       // Filter by property type
-      if (filters.propertyType !== 'all' && property.property_type !== filters.propertyType) {
+      if (filters.propertyType !== 'all' && property.propertyType !== filters.propertyType) {
         return false;
       }
 
