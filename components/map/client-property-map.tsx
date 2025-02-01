@@ -69,23 +69,19 @@ export function ClientPropertyMap({
         {properties.map((property) => (
           <Marker
             key={property.id}
-            position={[property.latitude, property.longitude]}
+            position={[
+              property.location.coordinates.lat,
+              property.location.coordinates.lng
+            ]}
             icon={createCustomMarker(property.price)}
           >
             <Popup>
-              <div className="p-2 min-w-[200px]">
-                <h3 className="font-semibold text-lg">{property.title}</h3>
-                <p className="text-sm text-gray-600">{property.address}</p>
-                <div className="mt-2 space-y-1">
-                  <p className="text-sm">
-                    <span className="font-medium">{property.bedrooms}</span> beds • 
-                    <span className="font-medium"> {property.bathrooms}</span> baths • 
-                    <span className="font-medium"> {property.area_sqm}</span> sqm
-                  </p>
-                  <p className="text-sm font-medium text-blue-600">
-                    ETB {property.price.toLocaleString()}
-                  </p>
-                </div>
+              <div className="p-2">
+                <h3 className="font-semibold">{property.title}</h3>
+                <p className="text-sm text-gray-600">{property.location.address}</p>
+                <p className="text-sm font-medium mt-1">
+                  ETB {property.price.toLocaleString()}
+                </p>
               </div>
             </Popup>
           </Marker>
