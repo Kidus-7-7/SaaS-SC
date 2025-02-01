@@ -1,11 +1,38 @@
-import { Property } from '../types/property';
+import { createClient } from '@supabase/supabase-js'
+import { AgentStatus, Property, PropertyType, Licensenumber, Experienceyears, rating, PropertyStatus } from '../types/property';
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export async function getProperties() {
+  const { data: properties, error } = await supabase
+    .from('properties')
+    .select(`
+      *,
+      agent:agents(*)
+    `)
+
+  if (error) throw error
+  return properties
+}
+
+// Keep the static data as fallback
 export const properties: Property[] = [
   {
     id: 1,
     title: 'Modern Apartment in Bole',
     type: 'rent',
     price: 25000,
+    propertyType: 'apartment' as PropertyType,
+    listingType: 'rent',
+    propertyStatus: 'newly-built' as PropertyStatus,
+    furnishing: 'unfurnished',
+    parkingSpots: 1,
+    hasBasement: false,
+    hasTour: true,
+    daysListed: 0,
     location: {
       address: 'Bole Road, Near Friendship Hotel',
       city: 'Addis Ababa',
@@ -20,13 +47,25 @@ export const properties: Property[] = [
     ],
     features: ['Parking', 'Security', 'Elevator'],
     description: 'Modern apartment with great city views',
-    agent: { id: 1, name: 'Abebe Kebede', status: 'active' }
+    agent: { 
+      id: 1,
+      name: 'Abebe Kebede',
+      status: 'available' as AgentStatus
+    }
   },
   {
     id: 2,
     title: 'Luxury Villa in CMC',
     type: 'buy',
     price: 12000000,
+    propertyType: 'villa' as PropertyType,
+    listingType: 'buy',
+    propertyStatus: 'newly-built' as PropertyStatus,
+    furnishing: 'unfurnished',
+    parkingSpots: 2,
+    hasBasement: true,
+    hasTour: true,
+    daysListed: 0,
     location: {
       address: 'Mexico Square, Behind Century Mall',
       city: 'Addis Ababa',
@@ -41,6 +80,10 @@ export const properties: Property[] = [
     ],
     features: ['Garden', 'Pool', 'Security'],
     description: 'Spacious villa with modern amenities',
-    agent: { id: 2, name: 'Sara Mohammed', status: 'active' }
+    agent: { 
+      id: 2,
+      name: 'Sara Mohammed',
+      status: 'available' as AgentStatus
+    }
   }
 ];

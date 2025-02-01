@@ -1,38 +1,51 @@
+export type AgentStatus = 'active' | 'inactive' | 'busy' | 'available' | 'pending';
+export type PropertyStatus = 'available' | 'pending' | 'sold' | 'rented';
+
+export interface Agent {
+  id: string | number;
+  name: string;
+  status: AgentStatus;
+  license_number: string;
+  experience_years: number;
+  rating: number;
+  bio: string;
+  specialization: string[];
+  email?: string;
+  full_name?: string;
+}
+
 export interface Property {
-  id: string;
+  id: string | number;
   title: string;
-  description: string;
+  type: 'rent' | 'buy';
+  propertyType: 'house' | 'apartment' | 'villa' | 'commercial' | 'land';
+  listingType: 'sale' | 'rent';
+  propertyStatus: PropertyStatus;
   price: number;
-  property_type: 'house' | 'apartment' | 'villa' | 'commercial' | 'land';
-  listing_type: 'sale' | 'rent';
-  status: 'available' | 'pending' | 'sold' | 'rented';
   bedrooms?: number;
   bathrooms?: number;
-  area_sqm: number;
-  address: string;
-  city: string;
-  latitude: number;
-  longitude: number;
-  features: string[];
+  area: number;
+  location: {
+    address: string;
+    city: string;
+    subCity: string;
+    coordinates: { lat: number; lng: number };
+  };
   images: string[];
-  owner_id: string;
-  agent_id?: string;
-  created_at: string;
-  updated_at: string;
+  features: string[];
+  description: string;
+  ownerId: string;
+  agentId?: string;
+  createdAt: string;
+  updatedAt: string;
   owner?: {
     full_name: string;
     email: string;
   };
-  agent?: {
-    id: string;
-    license_number: string;
-    experience_years: number;
-    rating: number;
-    bio: string;
-    specialization: string[];
-    user: {
-      full_name: string;
-      email: string;
-    };
-  };
+  agent?: Agent;
+  furnishing?: string;
+  parkingSpots?: number;
+  hasBasement?: boolean;
+  hasTour?: boolean;
+  daysListed?: number;
 }

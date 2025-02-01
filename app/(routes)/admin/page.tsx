@@ -176,21 +176,21 @@ export default function AdminPage() {
                     <TableCell>ETB {property.price.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge>
-                        {property.property_type}
+                        {property.propertyType}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handlePropertyAction(property.id, 'approve')}
+                          onClick={() => handlePropertyAction(property.id.toString(), 'approve')}
                         >
                           Approve
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handlePropertyAction(property.id, 'reject')}
+                          onClick={() => handlePropertyAction(property.id.toString(), 'reject')}
                         >
                           Reject
                         </Button>

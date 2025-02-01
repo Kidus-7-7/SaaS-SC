@@ -65,6 +65,12 @@ export type AgentStatus =
   | 'busy'
   | 'offline';
 
+export type Licensenumber = string;
+
+export type Experienceyears = number;
+
+export type rating = number;
+
 export interface PropertyFilters {
   priceRange: [number, number];
   bedrooms: number[];
