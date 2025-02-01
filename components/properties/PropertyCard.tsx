@@ -30,7 +30,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
           {property.bedrooms && <span>{property.bedrooms} beds</span>}
           {property.bathrooms && <span>{property.bathrooms} baths</span>}
-          <span>{property.area_sqm} sqm</span>
+          <span>{property.area} sqm</span>
         </div>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
           {property.description}
