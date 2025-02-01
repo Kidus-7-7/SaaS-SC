@@ -25,7 +25,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <h3 className="text-lg font-semibold">{property.title}</h3>
         <p className="text-xl font-bold text-primary">
           ETB {property.price.toLocaleString()}
-          {property.listing_type === 'rent' && '/month'}
+          {property.listingType === 'rent' && '/month'}
         </p>
         <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
           {property.bedrooms && <span>{property.bedrooms} beds</span>}
