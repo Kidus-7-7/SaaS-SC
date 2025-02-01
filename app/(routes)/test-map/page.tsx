@@ -18,16 +18,22 @@ const sampleProperties: Property[] = [
     propertyStatus: 'available',
     bedrooms: 2,
     bathrooms: 2,
-    area_sqm: 120,
-    address: 'Bole Road, Near Millennium Hall',
-    city: 'Addis Ababa',
-    latitude: 9.0215,
-    longitude: 38.7892,
+    area: 120,
+    location: {
+      address: 'Bole Road, Near Millennium Hall',
+      city: 'Addis Ababa',
+      subCity: 'Bole',
+      coordinates: {
+        lat: 9.0215,
+        lng: 38.7892
+      }
+    },
     features: ['parking', 'security', 'elevator'],
     images: ['/images/sample/apartment1.jpg'],
-    owner_id: 'sample-owner-1',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    ownerId: 'sample-owner-1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    type: 'buy'
   },
   {
     id: '2',
@@ -39,16 +45,22 @@ const sampleProperties: Property[] = [
     propertyStatus: 'available',
     bedrooms: 4,
     bathrooms: 3,
-    area_sqm: 300,
-    address: 'CMC Road, Behind St. Michael Church',
-    city: 'Addis Ababa',
-    latitude: 9.0234,
-    longitude: 38.7912,
+    area: 300,
+    location: {
+      address: 'CMC Road, Behind St. Michael Church',
+      city: 'Addis Ababa',
+      subCity: 'CMC',
+      coordinates: {
+        lat: 9.0234,
+        lng: 38.7912
+      }
+    },
     features: ['parking', 'garden', 'security'],
     images: ['/images/sample/villa1.jpg'],
-    owner_id: 'sample-owner-2',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    ownerId: 'sample-owner-2',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    type: 'buy'
   },
   {
     id: '3',
@@ -60,16 +72,22 @@ const sampleProperties: Property[] = [
     propertyStatus: 'available',
     bedrooms: undefined,
     bathrooms: 2,
-    area_sqm: 150,
-    address: 'Piassa, Near National Theater',
-    city: 'Addis Ababa',
-    latitude: 9.0346,
-    longitude: 38.7468,
+    area: 150,
+    location: {
+      address: 'Piassa, Near National Theater',
+      city: 'Addis Ababa',
+      subCity: 'Piassa',
+      coordinates: {
+        lat: 9.0346,
+        lng: 38.7468
+      }
+    },
     features: ['parking', 'security', 'water_tank'],
     images: ['/images/sample/commercial1.jpg'],
-    owner_id: 'sample-owner-3',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    ownerId: 'sample-owner-3',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    type: 'rent'
   },
 ];
 
@@ -118,8 +136,8 @@ export default function TestMapPage() {
       return [9.0222, 38.7468] as [number, number]; // Default to Addis Ababa
     }
 
-    const sumLat = filteredProperties.reduce((sum, p) => sum + p.latitude, 0);
-    const sumLng = filteredProperties.reduce((sum, p) => sum + p.longitude, 0);
+    const sumLat = filteredProperties.reduce((sum, p) => sum + p.location.coordinates.lat, 0);
+    const sumLng = filteredProperties.reduce((sum, p) => sum + p.location.coordinates.lng, 0);
     return [
       sumLat / filteredProperties.length,
       sumLng / filteredProperties.length
@@ -173,12 +191,12 @@ export default function TestMapPage() {
             </div>
             <div className="p-4">
               <h3 className="font-semibold text-lg">{property.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">{property.address}</p>
+              <p className="text-sm text-gray-600 mt-1">{property.location.address}</p>
               <div className="mt-2">
                 <p className="text-sm">
                   <span className="font-medium">{property.bedrooms}</span> beds • 
                   <span className="font-medium"> {property.bathrooms}</span> baths • 
-                  <span className="font-medium"> {property.area_sqm}</span> sqm
+                  <span className="font-medium"> {property.area}</span> sqm
                 </p>
                 <p className="text-lg font-medium text-blue-600 mt-2">
                   ETB {property.price.toLocaleString()}
