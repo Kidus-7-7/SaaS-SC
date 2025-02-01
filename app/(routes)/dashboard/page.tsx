@@ -29,12 +29,16 @@ export default function DashboardPage() {
           .from('properties')
           .select(`
             *,
-            owner:owner_id(full_name, email),
-            agent:agent_id(*)
+            agent:agents(*)
           `)
           .eq('owner_id', (await supabase.auth.getUser()).data.user?.id);
 
         if (propertiesError) throw propertiesError;
+
+        const properties = propertiesData?.map(property => ({
+          ...property,
+          propertyStatus: property.status,
+        }));
 
         // Get user's subscription
         const { data: subscriptionData, error: subscriptionError } = await supabase
@@ -47,7 +51,7 @@ export default function DashboardPage() {
           throw subscriptionError;
         }
 
-        setProperties(propertiesData || []);
+        setProperties(properties);
         setSubscription(subscriptionData);
       } catch (error: any) {
         toast({
@@ -116,14 +120,14 @@ export default function DashboardPage() {
                 <Badge
                   className="absolute top-4 right-4 z-10"
                   variant={
-                    property.status === 'available'
+                    property.propertyStatus === 'available'
                       ? 'default'
-                      : property.status === 'pending'
+                      : property.propertyStatus === 'pending'
                       ? 'secondary'
                       : 'destructive'
                   }
                 >
-                  {property.status}
+                  {property.propertyStatus}
                 </Badge>
                 <PropertyCard property={property} />
               </div>
