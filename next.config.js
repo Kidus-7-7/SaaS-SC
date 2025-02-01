@@ -5,18 +5,13 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
-<<<<<<< HEAD
-      },
-    ],
-  },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-=======
         pathname: '/**',
       }
     ]
->>>>>>> 7cc520c (package json updated)
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  }
 }
 
 module.exports = nextConfig
