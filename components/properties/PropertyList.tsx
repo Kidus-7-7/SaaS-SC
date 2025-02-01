@@ -15,21 +15,27 @@ const sampleProperties: Property[] = [
     title: 'Modern Apartment in Bole',
     description: 'A beautiful modern apartment in the heart of Bole',
     price: 5000000,
-    property_type: 'apartment',
-    listing_type: 'sale',
-    status: 'available',
+    propertyType: 'apartment',
+    listingType: 'sale',
+    propertyStatus: 'available',
     bedrooms: 3,
     bathrooms: 2,
-    area_sqm: 120,
-    address: 'Bole Road',
-    city: 'Addis Ababa',
-    latitude: 9.0222,
-    longitude: 38.7468,
+    area: 120,
+    location: {
+      address: 'Bole Road',
+      city: 'Addis Ababa',
+      subCity: 'Bole',
+      coordinates: {
+        lat: 9.0222,
+        lng: 38.7468
+      }
+    },
     features: ['parking', 'security', 'elevator'],
     images: ['/placeholder.jpg'],
-    owner_id: '1',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    ownerId: '1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    type: 'buy'
   }
 ];
 
@@ -50,7 +56,7 @@ export function PropertyList({ type, filters }: PropertyListProps) {
     // For now, we'll filter the sample data
     const filteredProperties = sampleProperties.filter(property => {
       // Filter by type (sale/rent)
-      if (property.listing_type !== type) return false;
+      if (property.listingType !== type) return false;
 
       // Filter by bedrooms
       if (filters.bedrooms !== 'any') {
@@ -103,7 +109,7 @@ export function PropertyList({ type, filters }: PropertyListProps) {
                 objectFit="cover"
               />
               <Badge className="absolute top-2 right-2">
-                {property.status}
+                {property.propertyStatus}
               </Badge>
             </div>
             <CardContent className="p-4">
@@ -112,7 +118,7 @@ export function PropertyList({ type, filters }: PropertyListProps) {
                   <h3 className="text-lg font-semibold">{property.title}</h3>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="h-4 w-4" />
-                    <span className="text-sm">{property.address}, {property.city}</span>
+                    <span className="text-sm">{property.location.address}, {property.location.city}</span>
                   </div>
                 </div>
 
@@ -131,7 +137,7 @@ export function PropertyList({ type, filters }: PropertyListProps) {
                   )}
                   <div className="flex items-center gap-1">
                     <Square className="h-4 w-4" />
-                    <span>{property.area_sqm} m²</span>
+                    <span>{property.area} m²</span>
                   </div>
                 </div>
 
