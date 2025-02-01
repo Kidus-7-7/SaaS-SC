@@ -5,8 +5,8 @@ export interface SearchFilters {
     min: number;
     max: number;
   };
-  propertyType: Property['property_type'][];
-  listingType: Property['listing_type'][];
+  propertyType: Property['propertyType'][];
+  listingType: Property['listingType'][];
   bedrooms?: number;
   bathrooms?: number;
   areaSqm?: {
@@ -52,3 +52,13 @@ export interface SearchResult {
   pageSize: number;
   filters: SearchFilters;
 }
+
+export type PropertySearchParams = {
+  propertyType?: Property['propertyType'];
+  listingType?: Property['listingType'];
+  minPrice?: number;
+  maxPrice?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  features?: string[];
+};
