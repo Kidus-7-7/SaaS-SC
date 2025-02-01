@@ -11,6 +11,9 @@ import { MultiSelect } from '@/components/ui/select';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+// Add this type at the top of the file
+type PropertyType = 'apartment' | 'house' | 'villa' | 'commercial' | 'land';
+
 export function AdvancedSearch() {
   const [filters, setFilters] = useState<SearchFilters>({
     priceRange: { min: 0, max: 10000000 },
@@ -85,16 +88,16 @@ export function AdvancedSearch() {
 
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">Property Type</h3>
-          <MultiSelect<Property['property_type']>
+          <MultiSelect<PropertyType>
             label="Property Type"
             value={filters.propertyType}
             onChange={(value) => handleFilterChange('propertyType', value)}
             options={[
-              { label: 'House', value: 'house' },
-              { label: 'Apartment', value: 'apartment' },
-              { label: 'Villa', value: 'villa' },
-              { label: 'Commercial', value: 'commercial' },
-              { label: 'Land', value: 'land' }
+              { value: 'apartment', label: 'Apartment' },
+              { value: 'house', label: 'House' },
+              { value: 'villa', label: 'Villa' },
+              { value: 'commercial', label: 'Commercial' },
+              { value: 'land', label: 'Land' }
             ]}
           />
         </div>
