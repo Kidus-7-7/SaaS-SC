@@ -24,11 +24,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Navigation />
-        <main>{children}</main>
-        <ProvidersWrapper />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+      </head>
+      <body suppressHydrationWarning>
+        <div className={inter.className}>
+          <div className="min-h-screen flex flex-col">
+            <Navigation />
+            <main className="flex-1 w-full">{children}</main>
+            <ProvidersWrapper />
+          </div>
+        </div>
       </body>
     </html>
   );
