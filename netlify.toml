@@ -6,6 +6,11 @@
   publish = ".next"
   functions = "netlify/functions"
 
+[[redirects]]
+  from = "/old-page"
+  to = "/new-page"
+  status = 301
+
 [dev]
   command = "npm run dev"
   port = 3000
