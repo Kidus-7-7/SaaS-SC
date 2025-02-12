@@ -35,9 +35,9 @@ export default function DashboardPage() {
 
         if (propertiesError) throw propertiesError;
 
-        const properties = propertiesData?.map(property => ({
+        const properties = propertiesData?.map((property: Property) => ({
           ...property,
-          propertyStatus: property.status,
+          propertyStatus: property.propertyStatus,
         }));
 
         // Get user's subscription
