@@ -21,10 +21,12 @@ export interface Property {
   propertyType: 'house' | 'apartment' | 'villa' | 'commercial' | 'land';
   listingType: 'sale' | 'rent';
   propertyStatus: PropertyStatus;
+  status: PropertyStatus;  // Alias for propertyStatus for consistency
   price: number;
   bedrooms?: number;
   bathrooms?: number;
   area: number;
+  size: number;  // Alias for area for consistency
   location: {
     address: string;
     city: string;
@@ -48,4 +50,5 @@ export interface Property {
   hasBasement?: boolean;
   hasTour?: boolean;
   daysListed?: number;
+  views?: number;  // Added views field
 }

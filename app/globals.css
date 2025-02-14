@@ -104,3 +104,121 @@
 .leaflet-popup-close-button {
   color: #4b5563;
 }
+
+/* Mobile-first responsive styles */
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply antialiased min-h-screen bg-background font-sans;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Better tap targets for mobile */
+button, a {
+  @apply cursor-pointer min-h-[44px] min-w-[44px];
+}
+
+/* Responsive container padding */
+.container {
+  @apply px-4 sm:px-6 lg:px-8 mx-auto;
+  max-width: 1400px;
+}
+
+/* Responsive typography */
+h1 {
+  @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+}
+
+h2 {
+  @apply text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight;
+}
+
+h3 {
+  @apply text-xl sm:text-2xl md:text-3xl font-semibold;
+}
+
+p {
+  @apply text-base sm:text-lg leading-relaxed;
+}
+
+/* Responsive grid layouts */
+.grid-cols-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+}
+
+/* Form elements */
+input, select, textarea {
+  @apply w-full px-4 py-2 text-base rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Better mobile scrolling */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-friendly cards */
+.card {
+  @apply rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow;
+}
+
+/* Loading states */
+.skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+/* Mobile navigation drawer */
+.mobile-drawer {
+  @apply fixed inset-0 bg-background/80 backdrop-blur-sm z-50;
+}
+
+/* Mobile-friendly buttons */
+.btn-mobile {
+  @apply w-full justify-center py-3 text-base font-medium;
+}
+
+/* Responsive spacing utilities */
+.section-padding {
+  @apply py-8 sm:py-12 md:py-16 lg:py-20;
+}
+
+.section-margin {
+  @apply my-8 sm:my-12 md:my-16 lg:my-20;
+}
+
+/* Responsive images */
+.img-responsive {
+  @apply w-full h-auto object-cover;
+}
+
+/* Mobile-friendly tables */
+.table-responsive {
+  @apply w-full overflow-x-auto -mx-4 sm:mx-0;
+}
+
+.table-responsive table {
+  @apply min-w-full divide-y divide-border;
+}
+
+/* Mobile touch feedback */
+@media (hover: none) {
+  .hover\:opacity-80:hover {
+    opacity: 1;
+  }
+  
+  .touch-feedback:active {
+    @apply opacity-80 transition-opacity;
+  }
+}
