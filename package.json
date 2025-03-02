@@ -86,6 +86,7 @@
     "tailwindcss-animate": "^1.0.7",
     "utf-8-validate": "^6.0.5",
     "vaul": "^0.9.9",
+    "yarn": "^1.22.22",
     "zod": "^3.24.1"
   },
   "devDependencies": {
